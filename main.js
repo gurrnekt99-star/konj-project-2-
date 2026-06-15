@@ -22,7 +22,7 @@ class LottoBall extends HTMLElement {
                     font-weight: bold;
                     color: #fff;
                     background-color: var(--ball-color);
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    box-shadow: 0 4px 8px var(--ball-shadow, rgba(0, 0, 0, 0.2));
                     transition: transform 0.2s;
                 }
                 :host(:hover) {
@@ -56,6 +56,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const lottoNumbersContainer = document.getElementById('lotto-numbers');
     const historyList = document.getElementById('history-list');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // Theme initialization
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButtonText(savedTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButtonText(newTheme);
+    });
+
+    function updateThemeButtonText(theme) {
+        themeToggle.textContent = theme === 'light' ? '다크 모드' : '화이트 모드';
+    }
 
     generateBtn.addEventListener('click', () => {
         const numbers = generateLottoNumbers();
