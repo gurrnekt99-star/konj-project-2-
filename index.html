@@ -19,6 +19,21 @@
             <h2>추첨 이력</h2>
             <ul id="history-list"></ul>
         </div>
+        <div class="partnership">
+            <h2>제휴 문의</h2>
+            <form action="https://formspree.io/f/mgobdqrw" method="POST" id="partnership-form">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="이름 / 회사명" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="_replyto" placeholder="이메일 주소" required>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="문의 내용" required></textarea>
+                </div>
+                <button type="submit" id="submit-btn">문의하기</button>
+            </form>
+        </div>
     </div>
     <script src="main.js"></script>
 </body>
