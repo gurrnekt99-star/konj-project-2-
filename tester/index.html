@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>기프티콘 자동매입 대시보드</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+  <div class="max-w-6xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">기프티콘 자동매입 시스템</h1>
+        <p class="text-gray-500 mt-1">실시간 등록 감지 및 자동 매입 대시보드</p>
+      </div>
+      <button id="toggleBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow">
+        자동매입 시작
+      </button>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow">
+        <p class="text-gray-500 text-sm">오늘 매입 수량</p>
+        <h2 id="todayCount" class="text-3xl font-bold mt-2">0건</h2>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow">
+        <p class="text-gray-500 text-sm">현재 감시 키워드</p>
+        <h2 class="text-xl font-semibold mt-2">스타벅스 / 배민 / CU</h2>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 shadow">
+        <p class="text-gray-500 text-sm">자동 상태</p>
+        <h2 id="statusText" class="text-2xl font-bold mt-2 text-red-500">중지됨</h2>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">자동매입 설정</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">최대 매입 금액</label>
+          <input type="number" id="maxPrice" value="50000"
+            class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">최소 할인율 (%)</label>
+          <input type="number" id="discountRate" value="15"
+            class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-sm font-medium mb-2">감시 브랜드</label>
+        <input type="text" id="brands" value="스타벅스, 배달의민족, CU"
+          class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500" />
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="px-6 py-4 border-b flex items-center justify-between">
+        <h2 class="text-xl font-bold">실시간 감지 로그</h2>
+        <span class="text-sm text-gray-400">데모 UI</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="bg-gray-50 text-gray-500 text-sm">
+            <tr>
+              <th class="px-6 py-3">시간</th>
+              <th class="px-6 py-3">브랜드</th>
+              <th class="px-6 py-3">상품명</th>
+              <th class="px-6 py-3">판매가</th>
+              <th class="px-6 py-3">상태</th>
+            </tr>
+          </thead>
+          <tbody id="logTable" class="divide-y">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let running = false;
+    let count = 0;
+
+    const toggleBtn = document.getElementById('toggleBtn');
+    const statusText = document.getElementById('statusText');
+    const todayCount = document.getElementById('todayCount');
+    const logTable = document.getElementById('logTable');
+
+    const sampleItems = [
+      {
+        brand: '스타벅스',
+        item: '아메리카노 T',
+        price: '3,200원'
+      },
+      {
+        brand: '배달의민족',
+        item: '5만원권',
+        price: '42,000원'
+      },
+      {
+        brand: 'CU',
+        item: '1만원권',
+        price: '8,300원'
+      }
+    ];
+
+    function addLog() {
+      const random = sampleItems[Math.floor(Math.random() * sampleItems.length)];
+      const tr = document.createElement('tr');
+
+      const now = new Date().toLocaleTimeString();
+
+      tr.innerHTML = `
+        <td class="px-6 py-4">${now}</td>
+        <td class="px-6 py-4 font-medium">${random.brand}</td>
+        <td class="px-6 py-4">${random.item}</td>
+        <td class="px-6 py-4">${random.price}</td>
+        <td class="px-6 py-4">
+          <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+            자동 매입 완료
+          </span>
+        </td>
+      `;
+
+      logTable.prepend(tr);
+
+      count++;
+      todayCount.innerText = `${count}건`;
+    }
+
+    let interval = null;
+
+    toggleBtn.addEventListener('click', () => {
+      running = !running;
+
+      if (running) {
+        statusText.innerText = '실행중';
+        statusText.classList.remove('text-red-500');
+        statusText.classList.add('text-green-600');
+
+        toggleBtn.innerText = '자동매입 중지';
+        toggleBtn.classList.remove('bg-green-600');
+        toggleBtn.classList.add('bg-red-500');
+
+        interval = setInterval(addLog, 2500);
+      } else {
+        statusText.innerText = '중지됨';
+        statusText.classList.remove('text-green-600');
+        statusText.classList.add('text-red-500');
+
+        toggleBtn.innerText = '자동매입 시작';
+        toggleBtn.classList.remove('bg-red-500');
+        toggleBtn.classList.add('bg-green-600');
+
+        clearInterval(interval);
+      }
+    });
+  </script>
+</body>
+</html>
