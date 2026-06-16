@@ -1,107 +1,76 @@
+const URL = "https://teachablemachine.withgoogle.com/models/38rI8dBVk/";
 
-class LottoBall extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+let model, labelContainer, maxPredictions;
 
-    connectedCallback() {
-        const number = this.getAttribute('number');
-        const color = this.getColor(number);
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    --ball-color: ${color};
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 50%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                    color: #fff;
-                    background-color: var(--ball-color);
-                    box-shadow: 0 4px 8px var(--ball-shadow, rgba(0, 0, 0, 0.2));
-                    transition: transform 0.2s;
-                }
-                :host(:hover) {
-                    transform: scale(1.1);
-                }
-                @media (max-width: 600px) {
-                    :host {
-                        width: 40px;
-                        height: 40px;
-                        font-size: 1.2rem;
-                    }
-                }
-            </style>
-            <div>${number}</div>
-        `;
-    }
+async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-    getColor(number) {
-        const num = parseInt(number, 10);
-        if (num <= 10) return '#fbc400'; // 노란색
-        if (num <= 20) return '#69c8f2'; // 파란색
-        if (num <= 30) return '#ff7272'; // 빨간색
-        if (num <= 40) return '#aaa'; // 회색
-        return '#b0d840'; // 녹색
-    }
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 }
 
-customElements.define('lotto-ball', LottoBall);
+const imageUpload = document.getElementById('image-upload');
+const imagePreview = document.getElementById('image-preview');
+const resultContainer = document.getElementById('result-container');
+const labelContainerElement = document.getElementById('label-container');
+const loading = document.getElementById('loading');
+const uploadSection = document.querySelector('.upload-section');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const generateBtn = document.getElementById('generate-btn');
-    const lottoNumbersContainer = document.getElementById('lotto-numbers');
-    const historyList = document.getElementById('history-list');
-    const themeToggle = document.getElementById('theme-toggle');
+imageUpload.addEventListener('change', async (e) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
 
-    // Theme initialization
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    updateThemeButtonText(savedTheme);
+        reader.onload = async (event) => {
+            imagePreview.src = event.target.result;
+            uploadSection.classList.add('hidden');
+            loading.classList.remove('hidden');
 
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        updateThemeButtonText(newTheme);
-    });
+            if (!model) {
+                await init();
+            }
 
-    function updateThemeButtonText(theme) {
-        themeToggle.textContent = theme === 'light' ? '다크 모드' : '화이트 모드';
-    }
+            // Small delay to ensure image is rendered
+            imagePreview.onload = async () => {
+                await predict();
+                loading.classList.add('hidden');
+                resultContainer.classList.remove('hidden');
+            };
+        };
 
-    generateBtn.addEventListener('click', () => {
-        const numbers = generateLottoNumbers();
-        displayLottoNumbers(numbers);
-        addHistory(numbers);
-    });
-
-    function generateLottoNumbers() {
-        const numbers = new Set();
-        while (numbers.size < 6) {
-            numbers.add(Math.floor(Math.random() * 45) + 1);
-        }
-        return Array.from(numbers).sort((a, b) => a - b);
-    }
-
-    function displayLottoNumbers(numbers) {
-        lottoNumbersContainer.innerHTML = '';
-        numbers.forEach(number => {
-            const lottoBall = document.createElement('lotto-ball');
-            lottoBall.setAttribute('number', number);
-            lottoNumbersContainer.appendChild(lottoBall);
-        });
-    }
-
-    function addHistory(numbers) {
-        const listItem = document.createElement('li');
-        listItem.textContent = numbers.join(', ');
-        historyList.prepend(listItem);
+        reader.readAsDataURL(file);
     }
 });
+
+async function predict() {
+    const prediction = await model.predict(imagePreview);
+    labelContainerElement.innerHTML = '';
+
+    // Sort predictions by probability
+    prediction.sort((a, b) => b.probability - a.probability);
+
+    const resultTitle = document.createElement('div');
+    const topResult = prediction[0];
+    const animalName = topResult.className === 'dog' ? '강아지상' : '고양이상';
+    resultTitle.innerHTML = `<h3>당신은 <span style="color: #ff7e5f">${animalName}</span> 입니다!</h3>`;
+    labelContainerElement.appendChild(resultTitle);
+
+    for (let i = 0; i < maxPredictions; i++) {
+        const classPrediction = prediction[i].className === 'dog' ? '강아지' : '고양이';
+        const probability = (prediction[i].probability * 100).toFixed(0);
+        
+        const barContainer = document.createElement('div');
+        barContainer.style.marginBottom = '10px';
+        barContainer.innerHTML = `
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span>${classPrediction}</span>
+                <span>${probability}%</span>
+            </div>
+            <div class="result-bar">
+                <div class="result-fill" style="width: ${probability}%"></div>
+            </div>
+        `;
+        labelContainerElement.appendChild(barContainer);
+    }
+}

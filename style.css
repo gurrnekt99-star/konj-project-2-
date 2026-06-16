@@ -1,202 +1,117 @@
-
 :root {
-    --bg-color: #f0f2f5;
-    --container-bg: #fff;
+    --primary-color: #ff7e5f;
+    --secondary-color: #feb47b;
     --text-color: #333;
-    --primary-color: #007bff;
-    --primary-hover: #0056b3;
-    --history-bg: #f8f9fa;
-    --border-color: #007bff;
-    --ball-shadow: rgba(0, 0, 0, 0.2);
-    --container-shadow: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='dark'] {
-    --bg-color: #1a1a1a;
-    --container-bg: #2d2d2d;
-    --text-color: #f0f2f5;
-    --primary-color: #375a7f;
-    --primary-hover: #2b4764;
-    --history-bg: #3d3d3d;
-    --border-color: #375a7f;
-    --ball-shadow: rgba(0, 0, 0, 0.5);
-    --container-shadow: rgba(0, 0, 0, 0.3);
+    --bg-color: #f8f9fa;
 }
 
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
-    transition: background-color 0.3s, color 0.3s;
+    color: var(--text-color);
 }
 
 .container {
-    background-color: var(--container-bg);
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px var(--container-shadow);
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     text-align: center;
     width: 90%;
-    max-width: 500px;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    position: relative;
-}
-
-.theme-toggle-wrapper {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-}
-
-#theme-toggle {
-    background: none;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    padding: 5px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: bold;
-    transition: all 0.3s;
-}
-
-#theme-toggle:hover {
-    background-color: var(--primary-color);
-    color: #fff;
+    max-width: 400px;
 }
 
 h1 {
+    margin-bottom: 0.5rem;
     color: var(--primary-color);
-    margin-bottom: 20px;
 }
 
-.lotto-numbers {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
+.subtitle {
+    margin-bottom: 2rem;
+    color: #666;
 }
 
-#generate-btn {
-    background-color: var(--primary-color);
-    color: #fff;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1rem;
-    border-radius: 8px;
+.upload-btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50px;
     cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    font-weight: bold;
+    transition: transform 0.2s, background 0.2s;
 }
 
-#generate-btn:hover {
-    background-color: var(--primary-hover);
-    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.5);
+.upload-btn:hover {
+    background: #ff6a45;
+    transform: scale(1.05);
 }
 
-.history {
-    margin-top: 30px;
-    text-align: left;
-}
-
-.history h2 {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
-#history-list {
-    list-style: none;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-#history-list li {
-    background-color: var(--history-bg);
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background-color 0.3s;
-}
-
-.partnership {
-    margin-top: 40px;
-    text-align: left;
-}
-
-.partnership h2 {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-}
-
-#partnership-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.form-group input,
-.form-group textarea {
+#image-preview {
     width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    background-color: var(--history-bg);
-    color: var(--text-color);
-    font-size: 0.9rem;
-    box-sizing: border-box;
-    transition: background-color 0.3s, border-color 0.3s;
+    border-radius: 10px;
+    margin-top: 1rem;
+    max-height: 300px;
+    object-fit: cover;
 }
 
-.form-group textarea {
-    height: 100px;
-    resize: vertical;
+#label-container {
+    margin: 1.5rem 0;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
-#submit-btn {
-    background-color: var(--primary-color);
-    color: #fff;
-    border: none;
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+.result-bar {
+    height: 10px;
+    background: #eee;
+    border-radius: 5px;
+    margin-top: 5px;
+    overflow: hidden;
 }
 
-#submit-btn:hover {
-    background-color: var(--primary-hover);
+.result-fill {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.5s ease-out;
 }
 
-.comments {
-    margin-top: 40px;
-    text-align: left;
-}
-
-.comments h2 {
+.retry-btn {
+    background: none;
+    border: 2px solid var(--primary-color);
     color: var(--primary-color);
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 5px;
-    margin-bottom: 20px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 1rem;
 }
 
-@media (max-width: 600px) {
-    .container {
-        padding: 20px;
-    }
+.retry-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
 
-    #generate-btn {
-        padding: 12px 25px;
-    }
+.hidden {
+    display: none;
+}
+
+/* Spinner */
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
